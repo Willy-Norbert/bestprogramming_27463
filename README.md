@@ -2,6 +2,9 @@
 
 A web application for managing classroom and resource bookings in academic institutions.
 
+**Author:** Willy Norbert IRABARUTA  
+**Student ID:** 27463
+
 ## What is This?
 
 E-shuri is a booking system for schools and universities. Students and staff can book classrooms and resources through a website. The system automatically checks availability and prevents double bookings.
