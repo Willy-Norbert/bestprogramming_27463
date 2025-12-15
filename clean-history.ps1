@@ -32,3 +32,4 @@ git branch -m main
 Write-Host "`nHistory cleaned! Now push with: git push -f origin main" -ForegroundColor Green
 Write-Host "WARNING: This will overwrite all remote history!" -ForegroundColor Red
 
+

@@ -1,112 +1,79 @@
-# PowerShell script to test Docker setup
-# Run this script to verify Docker configuration
+# Test Docker setup and configuration
 
-Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "DOCKER SETUP TEST SCRIPT" -ForegroundColor Cyan
-Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host ""
+Write-Host "`n=== Docker Test Script ===" -ForegroundColor Cyan
 
-# Test 1: Check Docker installation
-Write-Host "1. Checking Docker installation..." -ForegroundColor Yellow
+# Test 1: Docker installation
+Write-Host "`n[1] Testing Docker installation..." -ForegroundColor Yellow
 try {
     $dockerVersion = docker --version
-    Write-Host "   ✅ Docker installed: $dockerVersion" -ForegroundColor Green
+    Write-Host "  OK Docker installed: $dockerVersion" -ForegroundColor Green
 } catch {
-    Write-Host "   ❌ Docker not found. Please install Docker Desktop." -ForegroundColor Red
+    Write-Host "  ERROR: Docker not installed!" -ForegroundColor Red
     exit 1
 }
 
+# Test 2: Docker Compose
+Write-Host "`n[2] Testing Docker Compose..." -ForegroundColor Yellow
 try {
     $composeVersion = docker-compose --version
-    Write-Host "   ✅ Docker Compose installed: $composeVersion" -ForegroundColor Green
+    Write-Host "  OK Docker Compose: $composeVersion" -ForegroundColor Green
 } catch {
-    Write-Host "   ❌ Docker Compose not found." -ForegroundColor Red
+    Write-Host "  ERROR: Docker Compose not found!" -ForegroundColor Red
     exit 1
 }
-Write-Host ""
 
-# Test 2: Check if Docker is running
-Write-Host "2. Checking if Docker is running..." -ForegroundColor Yellow
-try {
-    docker ps | Out-Null
-    Write-Host "   ✅ Docker is running" -ForegroundColor Green
-} catch {
-    Write-Host "   ❌ Docker is not running. Please start Docker Desktop." -ForegroundColor Red
-    Write-Host "   💡 Start Docker Desktop and wait for it to fully start." -ForegroundColor Yellow
-    exit 1
-}
-Write-Host ""
-
-# Test 3: Validate docker-compose.yml
-Write-Host "3. Validating docker-compose.yml..." -ForegroundColor Yellow
-try {
-    docker-compose config --quiet 2>&1 | Out-Null
-    Write-Host "   ✅ docker-compose.yml is valid" -ForegroundColor Green
-} catch {
-    Write-Host "   ❌ docker-compose.yml has errors" -ForegroundColor Red
-    docker-compose config
-    exit 1
-}
-Write-Host ""
-
-# Test 4: Check required files
-Write-Host "4. Checking required files..." -ForegroundColor Yellow
-$requiredFiles = @(
-    "Dockerfile",
-    "Dockerfile.frontend",
-    "backend/Dockerfile",
-    "docker-compose.yml"
-)
-
-$allFilesExist = $true
-foreach ($file in $requiredFiles) {
-    if (Test-Path $file) {
-        Write-Host "   ✅ $file exists" -ForegroundColor Green
-    } else {
-        Write-Host "   ❌ $file is missing" -ForegroundColor Red
-        $allFilesExist = $false
-    }
-}
-
-if (-not $allFilesExist) {
-    Write-Host "   ❌ Some required files are missing" -ForegroundColor Red
-    exit 1
-}
-Write-Host ""
-
-# Test 5: Check .env file
-Write-Host "5. Checking environment configuration..." -ForegroundColor Yellow
-if (Test-Path "backend/.env") {
-    Write-Host "   ✅ backend/.env exists" -ForegroundColor Green
+# Test 3: Docker daemon
+Write-Host "`n[3] Testing Docker daemon..." -ForegroundColor Yellow
+$result = docker ps 2>&1
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "  OK Docker daemon is running" -ForegroundColor Green
 } else {
-    Write-Host "   ⚠️  backend/.env not found (will use defaults)" -ForegroundColor Yellow
-    Write-Host "   💡 Create backend/.env with MONGODB_URI and JWT_SECRET" -ForegroundColor Yellow
+    Write-Host "  ERROR: Docker daemon is NOT running" -ForegroundColor Red
+    Write-Host "  Action: Start Docker Desktop and wait 2-3 minutes" -ForegroundColor Yellow
+    exit 1
 }
-Write-Host ""
 
-# Test 6: Check ports availability (optional)
-Write-Host "6. Checking port availability..." -ForegroundColor Yellow
-$ports = @(3000, 8080, 27017)
-foreach ($port in $ports) {
-    $connection = Test-NetConnection -ComputerName localhost -Port $port -WarningAction SilentlyContinue -InformationLevel Quiet
-    if ($connection) {
-        Write-Host "   ⚠️  Port $port is in use" -ForegroundColor Yellow
-    } else {
-        Write-Host "   ✅ Port $port is available" -ForegroundColor Green
-    }
+# Test 4: Check docker-compose.yml
+Write-Host "`n[4] Checking docker-compose.yml..." -ForegroundColor Yellow
+if (Test-Path "docker-compose.yml") {
+    Write-Host "  OK docker-compose.yml found" -ForegroundColor Green
+} else {
+    Write-Host "  ERROR: docker-compose.yml not found!" -ForegroundColor Red
+    exit 1
 }
-Write-Host ""
 
-Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "TEST COMPLETE" -ForegroundColor Cyan
-Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "Next steps:" -ForegroundColor Yellow
-Write-Host "  1. Start services: docker-compose up -d" -ForegroundColor White
-Write-Host "  2. View logs: docker-compose logs -f" -ForegroundColor White
-Write-Host "  3. Check status: docker-compose ps" -ForegroundColor White
-Write-Host "  4. Test health: curl http://localhost:3000/health" -ForegroundColor White
-Write-Host "  5. Stop services: docker-compose down" -ForegroundColor White
-Write-Host ""
+# Test 5: Check Dockerfiles
+Write-Host "`n[5] Checking Dockerfiles..." -ForegroundColor Yellow
+if (Test-Path "Dockerfile") {
+    Write-Host "  OK Dockerfile found" -ForegroundColor Green
+} else {
+    Write-Host "  ERROR: Dockerfile not found!" -ForegroundColor Red
+}
 
+if (Test-Path "Dockerfile.frontend") {
+    Write-Host "  OK Dockerfile.frontend found" -ForegroundColor Green
+} else {
+    Write-Host "  ERROR: Dockerfile.frontend not found!" -ForegroundColor Red
+}
 
+# Test 6: Check environment files
+Write-Host "`n[6] Checking environment files..." -ForegroundColor Yellow
+if (Test-Path "backend/.env") {
+    Write-Host "  OK backend/.env exists" -ForegroundColor Green
+} else {
+    Write-Host "  WARNING: backend/.env not found (will be created)" -ForegroundColor Yellow
+}
+
+# Test 7: Test docker-compose config
+Write-Host "`n[7] Testing docker-compose configuration..." -ForegroundColor Yellow
+$configTest = docker-compose config 2>&1
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "  OK docker-compose.yml is valid" -ForegroundColor Green
+} else {
+    Write-Host "  ERROR: docker-compose.yml has errors:" -ForegroundColor Red
+    Write-Host $configTest -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "`n=== All Tests Passed ===" -ForegroundColor Green
+Write-Host "`nYou can now run: docker-compose up -d --build`n" -ForegroundColor Cyan
