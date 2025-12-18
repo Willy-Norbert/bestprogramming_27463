@@ -277,8 +277,8 @@ cd bestprogramming_27463
 ```
 
 **Step 2: Install frontend dependencies**
-```bash
-npm install
+   ```bash
+   npm install
 ```
 
 This downloads all packages needed for the frontend.
@@ -295,9 +295,9 @@ This downloads all packages needed for the backend.
 **Step 4: Set up environment variables**
 
 Create a file named `.env` in the root directory:
-```env
-VITE_API_BASE_URL=http://localhost:3000/api
-```
+   ```env
+   VITE_API_BASE_URL=http://localhost:3000/api
+   ```
 
 Create a file named `.env` in the `backend` directory:
 ```env
@@ -363,8 +363,8 @@ npm run dev
 The backend will start on port 3000. You should see a message saying the server is running.
 
 **Start the frontend (in a new terminal):**
-```bash
-npm run dev
+   ```bash
+   npm run dev
 ```
 
 The frontend will start on port 5173. You should see a message with the local URL.
